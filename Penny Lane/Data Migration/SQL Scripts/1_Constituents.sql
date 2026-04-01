@@ -13,13 +13,11 @@ Select
     end as [Do Not Contact?]
     , c.Email as [Contact: email]
    
-    ,  '(' + SUBSTRING(c.[Billing Phone Number],1,3) + ') ' +
-        SUBSTRING(c.[Billing Phone Number],4,3) + '-' +
-        SUBSTRING(c.[Billing Phone Number],7,4) as [Contact: Cell Phone]
-    
-    ,  '(' + SUBSTRING(c.[Shipping Phone Number],1,3) + ') ' +
-        SUBSTRING(c.[Shipping Phone Number],4,3) + '-' +
-        SUBSTRING(c.[Shipping Phone Number],7,4) as [Contact: Work phone]
+    ,  ISNULL(dbo.FormatPhone(c.[Billing Phone Number]),'') as [Contact: Cell Phone]
+    ,  ISNULL(Case
+        When c.[Shipping Phone Number] <> c.[Billing Phone Number] Then 
+         dbo.FormatPhone(c.[Shipping Phone Number])
+     End,'') as [Contact: Work phone]
     
     , CONCAT_WS(', ', c.[Billing Address 1], c.[Billing Address 2], c.[Billing City], c.[Billing Province/State], c.[Billing Zip], 
       c.[Billing Country]) as [Contact: Address 1 (text)]
@@ -27,4 +25,4 @@ Select
     --, c.ACTIVE_STATUS
 from dbo.[Square Space Export Contacts] c
 where c.[First Name] is not null or c.[Last Name] is not null
-
+order by c.[First Name]
